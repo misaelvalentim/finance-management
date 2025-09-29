@@ -5,7 +5,7 @@ import { useOrcamentos } from '@/hooks/useOrcamentos';
 import CurrencyInput from 'react-currency-input-field';
 import { FaCalendarAlt, FaTrash } from 'react-icons/fa';
 import { Orcamento } from '@/types';
-import { getFirstDayOfMonth, getMonthYear, toYYYYMMDD } from '@/utils/date';
+import { getMonthYear, toYYYYMMDD } from '@/utils/date';
 import { formatBRL } from '@/utils/currency';
 
 
@@ -20,7 +20,7 @@ const OrcamentoForm = ({ onAdd, currentDate }: { onAdd: (mes: string, limite: nu
     if (isSameMonth) {
       return toYYYYMMDD(now);
     } else {
-      return getFirstDayOfMonth(currentDate);
+      return toYYYYMMDD(currentDate);
     }
   };
 
