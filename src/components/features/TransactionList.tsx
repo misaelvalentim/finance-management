@@ -23,7 +23,7 @@ const TransactionList = ({ transactions, onDelete }: TransactionListProps) => {
     <div className="space-y-4 mt-4">
       {Object.entries(groupedTransactions).map(([date, transactionsOnDate]) => (
         <div key={date}>
-          <h3 className="text-sm font-bold text-gray-500 uppercase mb-2">
+          <h3 className="text-sm font-bold text-black uppercase mb-2">
             {formatFriendlyDate(date)}
           </h3>
           <div className="space-y-2">

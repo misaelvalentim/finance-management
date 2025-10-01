@@ -43,7 +43,7 @@ const TransactionItem = ({ transaction, onDelete }: TransactionItemProps) => {
         </div>
         <div>
           <p className="text-xs text-gray-400">Autor - {profiles?.nome_completo}</p>
-          <p className="font-bold text-gray-700">{descricao}</p>
+          <p className="font-bold text-gray-700 max-w-[500px]">{descricao}</p>
         </div>
       </div>
       <div className="flex items-center">

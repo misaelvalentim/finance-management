@@ -48,7 +48,7 @@ const MonthSelector = ({ currentDate, setCurrentDate }: MonthSelectorProps) => {
           <button
             key={month}
             onClick={() => handleMonthClick(index)}
-            className={`font-bold w-[inherit] !m-0 px-2 hover:text-black active:text-gray-400 focus:border-transparent focus:outline focus:outline-2 focus:outline-offset-[-2px] focus:outline-magenta ${index === currentMonth ? 'text-black' : 'text-gray-400'}`}
+            className={`font-bold w-[inherit] !m-0 px-2 hover:text-black active:text-gray-400 focus:border-transparent focus:outline focus:outline-2 focus:outline-offset-[-2px] focus:outline-black ${index === currentMonth ? 'text-black' : 'text-gray-400'}`}
           >
             {month}
           </button>
