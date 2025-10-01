@@ -14,7 +14,7 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const { supabase } = useAuth();
+  const { supabase, router } = useAuth();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +38,11 @@ export default function SignUpPage() {
           nome_completo: fullName,
           updated_at: new Date().toISOString(),
         });
-        setSuccess(true);
+        if (data.session) {
+          router.push('/');
+        } else {
+          setSuccess(true);
+        }
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -87,7 +91,7 @@ export default function SignUpPage() {
           >
             {loading ? 'Criando...' : 'Criar conta'}
           </button>
-          {success && <p className="mt-4 text-center text-sm text-green-500">Conta criada com sucesso! Redirecionando...</p>}
+          {success && <p className="mt-4 text-center text-sm text-green-500">Conta criada com sucesso! Verifique seu e-mail para finalizar o cadastro.</p>}
           {error && <p className="mt-4 text-center text-sm text-red-500 font-bold">{error}</p>}
         </form>
         <div className="mt-6 text-center">
