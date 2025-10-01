@@ -5,7 +5,7 @@ import { Lancamento } from '@/types';
 export function useTransactions(currentDate: Date) {
   const [transactions, setTransactions] = useState<Lancamento[]>([]);
   const [loading, setLoading] = useState(true);
-  const { supabase, user, loading: authLoading } = useAuth();
+  const { supabase, user, loading: authLoading, getFamilyMemberIds } = useAuth();
   const isInitialLoad = useRef(true);
 
   const fetchTransactions = useCallback(async () => {
@@ -13,6 +13,13 @@ export function useTransactions(currentDate: Date) {
 
     if (isInitialLoad.current) {
       setLoading(true);
+    }
+
+    const familyMemberIds = await getFamilyMemberIds();
+    if (familyMemberIds.length === 0) {
+      setTransactions([]);
+      setLoading(false);
+      return;
     }
 
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0];
@@ -32,10 +39,13 @@ export function useTransactions(currentDate: Date) {
         categorias (
           id,
           nome
+        ),
+        profiles (
+          nome_completo
         )
       `
       )
-      .eq('user_id', user.id)
+      .in('user_id', familyMemberIds)
       .gte('data', firstDayOfMonth)
       .lte('data', lastDayOfMonth)
       .order('data', { ascending: false });
@@ -51,7 +61,7 @@ export function useTransactions(currentDate: Date) {
       setLoading(false);
       isInitialLoad.current = false;
     }
-  }, [currentDate, supabase, user]);
+  }, [currentDate, supabase, user, getFamilyMemberIds]);
 
   useEffect(() => {
     if (!authLoading) {

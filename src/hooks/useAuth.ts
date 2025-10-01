@@ -89,5 +89,23 @@ export function useAuth() {
     }
   };
 
-  return { supabase, user, profile, loading, signOut, uploadAvatar, router };
+  const getFamilyMemberIds = useCallback(async (): Promise<string[]> => {
+    if (!profile || !profile.family_id) {
+      return user ? [user.id] : [];
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('family_id', profile.family_id);
+
+    if (error) {
+      console.error('Error fetching family members:', error);
+      return user ? [user.id] : [];
+    }
+
+    return data.map(p => p.id);
+  }, [profile, user, supabase]);
+
+  return { supabase, user, profile, loading, signOut, uploadAvatar, router, getFamilyMemberIds };
 };

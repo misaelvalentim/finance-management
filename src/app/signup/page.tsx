@@ -32,17 +32,11 @@ export default function SignUpPage() {
         },
       });
       if (error) throw error;
-      if (data.user) {
-        await supabase.from('profiles').upsert({ 
-          id: data.user.id,
-          nome_completo: fullName,
-          updated_at: new Date().toISOString(),
-        });
-        if (data.session) {
-          router.push('/');
-        } else {
-          setSuccess(true);
-        }
+
+      if (data.session) {
+        router.push('/');
+      } else {
+        setSuccess(true);
       }
     } catch (error) {
       if (error instanceof Error) {

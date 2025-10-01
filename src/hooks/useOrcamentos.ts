@@ -6,7 +6,7 @@ import { getFirstDayOfMonth } from '@/utils/date';
 export function useOrcamentos() {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [loading, setLoading] = useState(true);
-  const { supabase, user, loading: authLoading } = useAuth();
+  const { supabase, user, loading: authLoading, getFamilyMemberIds } = useAuth();
   const isInitialLoad = useRef(true);
 
   const fetchOrcamentos = useCallback(async () => {
@@ -16,10 +16,17 @@ export function useOrcamentos() {
       setLoading(true);
     }
 
+    const familyMemberIds = await getFamilyMemberIds();
+    if (familyMemberIds.length === 0) {
+      setOrcamentos([]);
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase
       .from('orcamentos')
       .select('*')
-      .eq('user_id', user.id)
+      .in('user_id', familyMemberIds)
       .order('mes', { ascending: false });
 
     if (error) {
@@ -33,7 +40,7 @@ export function useOrcamentos() {
       setLoading(false);
       isInitialLoad.current = false;
     }
-  }, [supabase, user]);
+  }, [supabase, user, getFamilyMemberIds]);
 
   useEffect(() => {
     if (!authLoading) {
