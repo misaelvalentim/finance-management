@@ -26,7 +26,7 @@ const Balance = ({ currentDate, onOpenOrcamento }: BalanceProps) => {
   if (loading && !hasLoadedOnce) {
     // Render a skeleton loader that mimics the component's structure
     return (
-      <div className="bg-gray-700 text-white p-6 rounded-2xl shadow-lg animate-pulse">
+      <div className="bg-gray-700 text-white p-6 rounded-2xl shadow-lg animate-pulse mb-4 xl:mb-6">
         <div className="flex justify-between items-center mb-2">
           <div className="h-4 bg-gray-600 rounded w-1/4"></div>
           <div className="h-6 bg-gray-600 rounded w-1/4"></div>
@@ -51,7 +51,7 @@ const Balance = ({ currentDate, onOpenOrcamento }: BalanceProps) => {
   const { month, year } = getMonthYear(currentDate);
 
   return (
-    <div style={{background: 'linear-gradient(102deg, #0F0F0F 0%, #2D2D2D 100%)'}} className="text-white p-6 rounded-2xl shadow-lg">
+    <div style={{background: 'linear-gradient(102deg, #0F0F0F 0%, #2D2D2D 100%)'}} className="text-white p-6 rounded-2xl shadow-lg mb-4 xl:mb-6">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm font-bold text-white uppercase">{month} / {year}</span>
         {hasBudget && (
