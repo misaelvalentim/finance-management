@@ -19,11 +19,12 @@ export default function Home() {
   const [key, setKey] = useState(0);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const { transactions, loading, deleteTransaction } = useTransactions(currentDate);
+  const { transactions, loading, deleteTransaction, revalidate: revalidateTransactions } = useTransactions(currentDate);
 
   const handleDataChange = () => {
     setIsTransactionModalOpen(false);
     // We don't close the orcamento modal here, it has its own close button
+    revalidateTransactions();
     setKey(prevKey => prevKey + 1);
   };
 

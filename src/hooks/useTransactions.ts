@@ -67,7 +67,22 @@ export function useTransactions(currentDate: Date) {
     if (!authLoading) {
       fetchTransactions();
     }
-  }, [authLoading, fetchTransactions]);
+
+    const channel = supabase
+      .channel('public:lancamentos')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'lancamentos' },
+        (_payload) => {
+          fetchTransactions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [authLoading, supabase, fetchTransactions]);
 
   const deleteTransaction = async (id: number) => {
     const { error } = await supabase.from('lancamentos').delete().match({ id });
