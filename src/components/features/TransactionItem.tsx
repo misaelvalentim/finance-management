@@ -13,7 +13,6 @@ import {
   FaEllipsisH
 } from 'react-icons/fa';
 import { formatBRL } from '@/utils/currency';
-import { formatShortDate } from '@/utils/date';
 
 interface TransactionItemProps {
   transaction: Lancamento;
@@ -31,7 +30,7 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
 };
 
 const TransactionItem = ({ transaction, onDelete }: TransactionItemProps) => {
-  const { descricao, valor, data, tipo, categorias, profiles } = transaction;
+  const { descricao, valor, tipo, categorias, profiles } = transaction;
 
   const categoryName = categorias ? categorias.nome.toLowerCase() : 'outro';
   const icon = categoryIcons[categoryName] || <FaEllipsisH className="text-gray-700" />;
@@ -45,7 +44,6 @@ const TransactionItem = ({ transaction, onDelete }: TransactionItemProps) => {
         <div>
           <p className="text-xs text-gray-400">Autor - {profiles?.nome_completo}</p>
           <p className="font-bold text-gray-700">{descricao}</p>
-          <p className="text-sm text-gray-500">{formatShortDate(data)}</p>
         </div>
       </div>
       <div className="flex items-center">

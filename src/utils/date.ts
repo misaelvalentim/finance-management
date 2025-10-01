@@ -24,3 +24,10 @@ export const formatShortDate = (dateString: string, locale: string = 'pt-BR'): s
     const date = new Date(dateString + 'T00:00:00');
     return date.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: '2-digit' });
 };
+
+export const formatFriendlyDate = (dateString: string, locale: string = 'pt-BR'): string => {
+    const date = new Date(dateString + 'T00:00:00');
+    const day = date.getDate();
+    const month = date.toLocaleString(locale, { month: 'long' });
+    return `${day} de ${month}`;
+};
