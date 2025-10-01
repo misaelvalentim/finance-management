@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useTransactions } from './useTransactions';
-import { useOrcamentos } from './useOrcamentos';
 import { getMonthYear } from '@/utils/date';
+import { Lancamento, Orcamento } from '@/types';
 
-export function useBalance(currentDate: Date) {
-  const { transactions, loading: transactionsLoading, revalidate: revalidateTransactions } = useTransactions(currentDate);
-  const { orcamentos, loading: orcamentosLoading, revalidate: revalidateOrcamentos } = useOrcamentos();
+interface UseBalanceProps {
+  currentDate: Date;
+  transactions: Lancamento[];
+  orcamentos: Orcamento[];
+}
 
+export function useBalance({ currentDate, transactions, orcamentos }: UseBalanceProps) {
   const [limit, setLimit] = useState(0);
   const [used, setUsed] = useState(0);
   const [income, setIncome] = useState(0);
@@ -35,14 +37,8 @@ export function useBalance(currentDate: Date) {
 
   }, [transactions, orcamentos, currentDate]);
 
-  const revalidate = () => {
-    revalidateTransactions();
-    revalidateOrcamentos();
-  }
-
-  const loading = transactionsLoading || orcamentosLoading;
   const available = limit - used;
   const progress = limit > 0 ? (used / limit) * 100 : 0;
 
-  return { loading, available, progress, used, limit, income, revalidate };
+  return { available, progress, used, limit, income };
 }

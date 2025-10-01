@@ -2,15 +2,12 @@
 
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useEffect, useRef } from 'react';
+import { useData } from '@/contexts/DataContext';
 
 const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
 
-interface MonthSelectorProps {
-  currentDate: Date;
-  setCurrentDate: (date: Date) => void;
-}
-
-const MonthSelector = ({ currentDate, setCurrentDate }: MonthSelectorProps) => {
+const MonthSelector = () => {
+  const { currentDate, setCurrentDate } = useData();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();

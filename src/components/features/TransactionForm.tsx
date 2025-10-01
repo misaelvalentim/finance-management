@@ -4,19 +4,18 @@ import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { FaArrowUp, FaArrowDown, FaRegBookmark } from 'react-icons/fa';
 import CurrencyInput from 'react-currency-input-field';
-import { useCategories } from '@/hooks/useCategories';
 import { toYYYYMMDD } from '@/utils/date';
+import { useData } from '@/contexts/DataContext';
 
 
 interface TransactionFormProps {
   onSuccess: () => void;
   onClose: () => void;
-  currentDate: Date;
 }
 
-const TransactionForm = ({ onSuccess, onClose, currentDate }: TransactionFormProps) => {
+const TransactionForm = ({ onSuccess, onClose }: TransactionFormProps) => {
   const supabase = createClient();
-  const { categories } = useCategories();
+  const { categories, currentDate } = useData();
 
   const getInitialDate = () => {
     const now = new Date();

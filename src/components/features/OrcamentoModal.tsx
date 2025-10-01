@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useOrcamentos } from '@/hooks/useOrcamentos';
+import { useData } from '@/contexts/DataContext';
 import CurrencyInput from 'react-currency-input-field';
 import { FaCalendarAlt, FaTrash } from 'react-icons/fa';
 import { Orcamento } from '@/types';
@@ -119,15 +119,21 @@ const OrcamentoList = ({ orcamentos, loading, onDelete }: { orcamentos: Orcament
 };
 
 // Main Modal Component
-const OrcamentoModal = ({ onClose, onSuccess, currentDate }: { onClose: () => void, onSuccess: () => void, currentDate: Date }) => {
-  const { orcamentos, loading, addOrcamento, deleteOrcamento } = useOrcamentos();
+const OrcamentoModal = ({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) => {
+  const { 
+    orcamentos, 
+    orcamentosLoading, 
+    addOrcamento, 
+    deleteOrcamento,
+    currentDate 
+  } = useData();
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   useEffect(() => {
-    if (!loading) {
+    if (!orcamentosLoading) {
       setHasLoadedOnce(true);
     }
-  }, [loading]);
+  }, [orcamentosLoading]);
 
   const handleAdd = async (mes: string, limite: number) => {
     await addOrcamento(mes, limite);
@@ -152,7 +158,7 @@ const OrcamentoModal = ({ onClose, onSuccess, currentDate }: { onClose: () => vo
         <OrcamentoForm onAdd={handleAdd} currentDate={currentDate} />
       </div>
       <div className="bg-white p-4 rounded-xl shadow-sm">
-        <OrcamentoList orcamentos={orcamentos} loading={loading && !hasLoadedOnce} onDelete={handleDelete} />
+        <OrcamentoList orcamentos={orcamentos} loading={orcamentosLoading && !hasLoadedOnce} onDelete={handleDelete} />
       </div>
     </div>
   );
