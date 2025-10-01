@@ -77,7 +77,7 @@ const Balance = ({ currentDate, onOpenOrcamento }: BalanceProps) => {
       
       {hasBudget && (
         <div className="w-full bg-gray-600 rounded-full h-1.5 mb-4">
-          <div className="bg-magenta h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
+          <div className="bg-magenta h-1.5 rounded-full max-w-full" style={{ width: `${progress}%` }}></div>
         </div>
       )}
 

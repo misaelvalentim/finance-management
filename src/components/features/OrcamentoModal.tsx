@@ -93,17 +93,17 @@ const OrcamentoList = ({ orcamentos, loading, onDelete }: { orcamentos: Orcament
           const { month, year } = getMonthYear(date);
 
           return (
-            <div key={orcamento.id} className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between">
+            <div key={orcamento.id} className="bg-white rounded-xl shadow-sm flex items-center justify-between gap-4 py-4">
               <div className="flex items-center">
-                <div className="bg-gray-100 p-3 rounded-lg mr-4">
+                <div className="bg-gray-100 rounded-lg mr-4">
                   <FaCalendarAlt className="text-gray-500" />
                 </div>
                 <div>
-                  <p className="font-bold text-gray-700 capitalize">{month} {year}</p>
+                  <p className="font-bold text-gray-700 capitalize w-[126px]">{month} {year}</p>
                 </div>
               </div>
               <div className="flex items-center">
-                <span className="font-bold text-gray-700 mr-4">
+                <span className="font-bold text-gray-700 mr-4 w-[98px]">
                   {formatBRL(orcamento.limite)}
                 </span>
                 <button onClick={() => onDelete(orcamento.id)} className="text-gray-400 hover:text-red">
