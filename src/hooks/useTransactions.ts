@@ -1,15 +1,25 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { Lancamento } from '@/types';
+import { SupabaseClient, User } from '@supabase/supabase-js';
 
-export function useTransactions(currentDate: Date) {
+interface UseTransactionsProps {
+  currentDate: Date;
+  user: User | null;
+  supabase: SupabaseClient;
+  getFamilyMemberIds: () => Promise<string[]>;
+}
+
+export function useTransactions({ currentDate, user, supabase, getFamilyMemberIds }: UseTransactionsProps) {
   const [transactions, setTransactions] = useState<Lancamento[]>([]);
   const [loading, setLoading] = useState(true);
-  const { supabase, user, loading: authLoading, getFamilyMemberIds } = useAuth();
   const isInitialLoad = useRef(true);
 
   const fetchTransactions = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setTransactions([]);
+      setLoading(false);
+      return;
+    };
 
     if (isInitialLoad.current) {
       setLoading(true);
@@ -64,9 +74,7 @@ export function useTransactions(currentDate: Date) {
   }, [currentDate, supabase, user, getFamilyMemberIds]);
 
   useEffect(() => {
-    if (!authLoading) {
-      fetchTransactions();
-    }
+    fetchTransactions();
 
     const channel = supabase
       .channel('public:lancamentos')
@@ -82,7 +90,7 @@ export function useTransactions(currentDate: Date) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authLoading, supabase, fetchTransactions]);
+  }, [supabase, fetchTransactions]);
 
   const deleteTransaction = async (id: number) => {
     const { error } = await supabase.from('lancamentos').delete().match({ id });

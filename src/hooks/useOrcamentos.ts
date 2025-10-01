@@ -1,16 +1,25 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import { Orcamento } from '@/types';
 import { getFirstDayOfMonth } from '@/utils/date';
+import { SupabaseClient, User } from '@supabase/supabase-js';
 
-export function useOrcamentos() {
+interface UseOrcamentosProps {
+  user: User | null;
+  supabase: SupabaseClient;
+  getFamilyMemberIds: () => Promise<string[]>;
+}
+
+export function useOrcamentos({ user, supabase, getFamilyMemberIds }: UseOrcamentosProps) {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [loading, setLoading] = useState(true);
-  const { supabase, user, loading: authLoading, getFamilyMemberIds } = useAuth();
   const isInitialLoad = useRef(true);
 
   const fetchOrcamentos = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setOrcamentos([]);
+      setLoading(false);
+      return;
+    }
 
     if (isInitialLoad.current) {
       setLoading(true);
@@ -43,10 +52,23 @@ export function useOrcamentos() {
   }, [supabase, user, getFamilyMemberIds]);
 
   useEffect(() => {
-    if (!authLoading) {
-      fetchOrcamentos();
-    }
-  }, [authLoading, fetchOrcamentos]);
+    fetchOrcamentos();
+
+    const channel = supabase
+      .channel('public:orcamentos')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orcamentos' },
+        (_payload) => {
+          fetchOrcamentos();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, fetchOrcamentos]);
 
   const addOrcamento = async (mes: string, limite: number) => {
     if (!user) throw new Error('User not found');
@@ -59,13 +81,11 @@ export function useOrcamentos() {
       .insert({ mes: firstDay, limite, user_id: user.id });
 
     if (error) throw error;
-    await fetchOrcamentos(); // Refetch to update the list
   };
 
   const deleteOrcamento = async (id: number) => {
     const { error } = await supabase.from('orcamentos').delete().match({ id });
     if (error) throw error;
-    await fetchOrcamentos(); // Refetch to update the list
   };
 
   const revalidate = () => {

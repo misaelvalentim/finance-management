@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { Categoria } from '@/types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
-export function useCategories() {
+interface UseCategoriesProps {
+  supabase: SupabaseClient;
+}
+
+export function useCategories({ supabase }: UseCategoriesProps) {
   const [categories, setCategories] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
   const isInitialLoad = useRef(true);
 
   const fetchCategories = useCallback(async () => {
@@ -32,7 +35,22 @@ export function useCategories() {
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+
+    const channel = supabase
+      .channel('public:categorias')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'categorias' },
+        (_payload) => {
+          fetchCategories();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, fetchCategories]);
 
   const revalidate = () => {
     isInitialLoad.current = true;

@@ -6,12 +6,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
 import { useCategories } from '@/hooks/useCategories';
-import { User } from '@supabase/supabase-js';
+import { User, SupabaseClient } from '@supabase/supabase-js';
 import { Lancamento, Orcamento, Categoria, Profile } from '@/types';
 
 // Define the shape of the context data
 interface DataContextType {
   // Auth
+  supabase: SupabaseClient;
   user: User | null;
   profile: Profile | null;
   authLoading: boolean;
@@ -48,12 +49,27 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const { user, profile, loading: authLoading, signOut, getFamilyMemberIds } = useAuth();
-  const { transactions, loading: transactionsLoading, deleteTransaction, revalidate: revalidateTransactions } = useTransactions(currentDate);
-  const { orcamentos, loading: orcamentosLoading, addOrcamento, deleteOrcamento, revalidate: revalidateOrcamentos } = useOrcamentos();
-  const { categories, loading: categoriesLoading, revalidate: revalidateCategories } = useCategories();
+  const { supabase, user, profile, loading: authLoading, signOut, getFamilyMemberIds } = useAuth();
+  
+  const { transactions, loading: transactionsLoading, deleteTransaction, revalidate: revalidateTransactions } = useTransactions({
+    currentDate,
+    user,
+    supabase,
+    getFamilyMemberIds,
+  });
+
+  const { orcamentos, loading: orcamentosLoading, addOrcamento, deleteOrcamento, revalidate: revalidateOrcamentos } = useOrcamentos({
+    user,
+    supabase,
+    getFamilyMemberIds,
+  });
+
+  const { categories, loading: categoriesLoading, revalidate: revalidateCategories } = useCategories({
+    supabase,
+  });
 
   const value = {
+    supabase,
     user,
     profile,
     authLoading,
