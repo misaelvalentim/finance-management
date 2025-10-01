@@ -3,13 +3,14 @@ import { Lancamento } from '@/types';
 import { 
   FaTrash, 
   FaShoppingBasket, 
-  FaGift, 
   FaHome, 
   FaMoneyBillWave, 
   FaArrowDown,
   FaArrowUp,
   FaBriefcaseMedical,
-  FaUniversity
+  FaUniversity,
+  FaUtensils,
+  FaEllipsisH
 } from 'react-icons/fa';
 import { formatBRL } from '@/utils/currency';
 import { formatShortDate } from '@/utils/date';
@@ -22,26 +23,26 @@ interface TransactionItemProps {
 }
 
 const categoryIcons: { [key: string]: React.ReactNode } = {
-  'compras': <FaShoppingBasket className="text-white" />,
-  'aluguel': <FaHome className="text-white" />,
-  'besteiras': <FaGift className="text-white" />,
-  'remedios': <FaBriefcaseMedical className="text-white" />,
-  'faculdade': <FaUniversity className="text-white" />,
-  'outros': <FaMoneyBillWave className="text-white" />,
-  'salario': <FaMoneyBillWave className="text-white" />,
+  'mercado': <FaShoppingBasket className="text-gray-700" />,
+  'moradia': <FaHome className="text-gray-700" />,
+  'restaurante': <FaUtensils className="text-gray-700" />,
+  'saude': <FaBriefcaseMedical className="text-gray-700" />,
+  'faculdade': <FaUniversity className="text-gray-700" />, 
+  'salario': <FaMoneyBillWave className="text-gray-700" />, 
+  'outro': <FaEllipsisH className="text-gray-700" />,
 };
 
 const TransactionItem = ({ transaction, onDelete }: TransactionItemProps) => {
   const { descricao, valor, data, tipo, categorias } = transaction;
 
-  const categoryName = categorias ? categorias.nome.toLowerCase() : 'outros';
-  const icon = categoryIcons[categoryName] || <FaMoneyBillWave className="text-white" />;
+  const categoryName = categorias ? categorias.nome.toLowerCase() : 'outro';
+  const icon = categoryIcons[categoryName] || <FaEllipsisH className="text-gray-700" />;
   const { profile } = useAuth()
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between">
+    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between gap-2">
       <div className="flex items-center">
-        <div style={{background: 'linear-gradient(102deg, #0F0F0F 0%, #2D2D2D 100%)'}} className="p-3 rounded-lg mr-4">
+        <div className="p-3 rounded-lg mr-4">
           {icon}
         </div>
         <div>
@@ -52,7 +53,7 @@ const TransactionItem = ({ transaction, onDelete }: TransactionItemProps) => {
       </div>
       <div className="flex items-center">
         <div className={`flex items-center font-bold mr-4 ${tipo === 'income' ? 'text-green' : 'text-red font-bold'}`}>
-          <span>{formatBRL(valor)}</span>
+          <span className='w-max'>{formatBRL(valor)}</span>
           {tipo === 'income' ? <FaArrowUp className="ml-1" /> : <FaArrowDown className="ml-1" />}
         </div>
         <button onClick={onDelete} className="text-gray-400 hover:text-red font-bold">
