@@ -6,16 +6,17 @@ interface UseTransactionsProps {
   currentDate: Date;
   user: User | null;
   supabase: SupabaseClient;
-  getFamilyMemberIds: () => Promise<string[]>;
+  familyMemberIds: string[];
+  authLoading: boolean;
 }
 
-export function useTransactions({ currentDate, user, supabase, getFamilyMemberIds }: UseTransactionsProps) {
+export function useTransactions({ currentDate, user, supabase, familyMemberIds, authLoading }: UseTransactionsProps) {
   const [transactions, setTransactions] = useState<Lancamento[]>([]);
   const [loading, setLoading] = useState(true);
   const isInitialLoad = useRef(true);
 
   const fetchTransactions = useCallback(async () => {
-    if (!user) {
+    if (!user || familyMemberIds.length === 0) {
       setTransactions([]);
       setLoading(false);
       return;
@@ -23,13 +24,6 @@ export function useTransactions({ currentDate, user, supabase, getFamilyMemberId
 
     if (isInitialLoad.current) {
       setLoading(true);
-    }
-
-    const familyMemberIds = await getFamilyMemberIds();
-    if (familyMemberIds.length === 0) {
-      setTransactions([]);
-      setLoading(false);
-      return;
     }
 
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0];
@@ -71,9 +65,10 @@ export function useTransactions({ currentDate, user, supabase, getFamilyMemberId
       setLoading(false);
       isInitialLoad.current = false;
     }
-  }, [currentDate, supabase, user, getFamilyMemberIds]);
+  }, [currentDate, supabase, user, familyMemberIds]);
 
   useEffect(() => {
+    if (authLoading) return;
     fetchTransactions();
 
     const channel = supabase
@@ -90,7 +85,7 @@ export function useTransactions({ currentDate, user, supabase, getFamilyMemberId
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchTransactions]);
+  }, [authLoading, supabase, fetchTransactions]);
 
   const deleteTransaction = async (id: number) => {
     const { error } = await supabase.from('lancamentos').delete().match({ id });

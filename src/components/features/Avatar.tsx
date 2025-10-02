@@ -3,14 +3,14 @@
 import { Profile } from '@/types';
 import Image from 'next/image';
 import { ChangeEvent, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useData } from '@/contexts/DataContext';
 
 interface AvatarProps {
   profile: Profile | null;
 }
 
 export default function Avatar({ profile }: AvatarProps) {
-  const { uploadAvatar } = useAuth();
+  const { uploadAvatar } = useData();
   const [uploading, setUploading] = useState(false);
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {

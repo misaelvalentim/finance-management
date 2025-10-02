@@ -17,7 +17,8 @@ interface DataContextType {
   profile: Profile | null;
   authLoading: boolean;
   signOut: () => Promise<void>;
-  getFamilyMemberIds: () => Promise<string[]>;
+  uploadAvatar: (file: File) => Promise<void>;
+  familyMemberIds: string[];
 
   // Transactions
   transactions: Lancamento[];
@@ -49,23 +50,27 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const { supabase, user, profile, loading: authLoading, signOut, getFamilyMemberIds } = useAuth();
+  const { supabase, user, profile, loading: authLoading, signOut, uploadAvatar, familyMemberIds } = useAuth();
   
   const { transactions, loading: transactionsLoading, deleteTransaction, revalidate: revalidateTransactions } = useTransactions({
     currentDate,
     user,
     supabase,
-    getFamilyMemberIds,
+    familyMemberIds,
+    authLoading,
   });
 
   const { orcamentos, loading: orcamentosLoading, addOrcamento, deleteOrcamento, revalidate: revalidateOrcamentos } = useOrcamentos({
     user,
     supabase,
-    getFamilyMemberIds,
+    familyMemberIds,
+    authLoading,
   });
 
   const { categories, loading: categoriesLoading, revalidate: revalidateCategories } = useCategories({
     supabase,
+    user,
+    authLoading,
   });
 
   const value = {
@@ -74,7 +79,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     profile,
     authLoading,
     signOut,
-    getFamilyMemberIds,
+    uploadAvatar,
+    familyMemberIds,
     transactions,
     transactionsLoading,
     deleteTransaction,

@@ -2,10 +2,10 @@
 
 import { FaSignOutAlt } from 'react-icons/fa';
 import Avatar from '@/components/features/Avatar';
-import { useAuth } from '@/hooks/useAuth';
+import { useData } from '@/contexts/DataContext';
 
 const Header = () => {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut } = useData();
 
   return (
     <header className="flex items-center justify-between p-4 bg-white">

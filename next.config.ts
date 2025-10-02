@@ -17,19 +17,10 @@ const nextConfig: NextConfig = {
         hostname: '*.supabase.co',
       },
       {
-        protocol: "https",
-        hostname: "**"
-      },
-      {
         protocol: "http",
         hostname: "localhost",
       },
     ],
-  },
-   i18n: {
-    locales: ["pt-BR"],      // only Portuguese
-    defaultLocale: "pt-BR",  // default language
-    localeDetection: false,  // disables automatic redirect
   },
 };
 

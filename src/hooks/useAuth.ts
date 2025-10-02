@@ -12,34 +12,45 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [familyMemberIds, setFamilyMemberIds] = useState<string[]>([]);
 
-  const fetchSession = useCallback(async () => {
+  const fetchSessionAndProfile = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const currentUser = session?.user ?? null;
     setUser(currentUser);
 
     if (currentUser) {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
-      setProfile(profileData as Profile | null);
+      // Call the RPC function to get profile and family members in one go
+      const { data, error } = await supabase.rpc('get_initial_user_data');
+
+      if (error) {
+        console.error('Error fetching initial user data:', error);
+        setProfile(null);
+        setFamilyMemberIds(currentUser ? [currentUser.id] : []);
+      } else if (data) {
+        setProfile(data.profile);
+        setFamilyMemberIds(data.familyMemberIds ?? [currentUser.id]);
+      }
+    } else {
+      // Ensure state is cleared on logout
+      setProfile(null);
+      setFamilyMemberIds([]);
     }
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
-    fetchSession();
+    fetchSessionAndProfile();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          fetchSession();
-        } else {
+        if (event === 'SIGNED_IN') {
+          fetchSessionAndProfile();
+        } else if (event === 'SIGNED_OUT') {
           setProfile(null);
+          setFamilyMemberIds([]);
+          setUser(null);
+          router.push('/login');
         }
       }
     );
@@ -47,11 +58,11 @@ export function useAuth() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, router, fetchSession]);
+  }, [supabase, router, fetchSessionAndProfile]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    // The onAuthStateChange listener will handle the state cleanup and redirect
   };
 
   const uploadAvatar = async (file: File) => {
@@ -89,23 +100,5 @@ export function useAuth() {
     }
   };
 
-  const getFamilyMemberIds = useCallback(async (): Promise<string[]> => {
-    if (!profile || !profile.family_id) {
-      return user ? [user.id] : [];
-    }
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('family_id', profile.family_id);
-
-    if (error) {
-      console.error('Error fetching family members:', error);
-      return user ? [user.id] : [];
-    }
-
-    return data.map(p => p.id);
-  }, [profile, user, supabase]);
-
-  return { supabase, user, profile, loading, signOut, uploadAvatar, router, getFamilyMemberIds };
+  return { supabase, user, profile, loading, signOut, uploadAvatar, router, familyMemberIds };
 };

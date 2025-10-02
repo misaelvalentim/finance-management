@@ -6,16 +6,17 @@ import { SupabaseClient, User } from '@supabase/supabase-js';
 interface UseOrcamentosProps {
   user: User | null;
   supabase: SupabaseClient;
-  getFamilyMemberIds: () => Promise<string[]>;
+  familyMemberIds: string[];
+  authLoading: boolean;
 }
 
-export function useOrcamentos({ user, supabase, getFamilyMemberIds }: UseOrcamentosProps) {
+export function useOrcamentos({ user, supabase, familyMemberIds, authLoading }: UseOrcamentosProps) {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [loading, setLoading] = useState(true);
   const isInitialLoad = useRef(true);
 
   const fetchOrcamentos = useCallback(async () => {
-    if (!user) {
+    if (!user || familyMemberIds.length === 0) {
       setOrcamentos([]);
       setLoading(false);
       return;
@@ -23,13 +24,6 @@ export function useOrcamentos({ user, supabase, getFamilyMemberIds }: UseOrcamen
 
     if (isInitialLoad.current) {
       setLoading(true);
-    }
-
-    const familyMemberIds = await getFamilyMemberIds();
-    if (familyMemberIds.length === 0) {
-      setOrcamentos([]);
-      setLoading(false);
-      return;
     }
 
     const { data, error } = await supabase
@@ -49,9 +43,10 @@ export function useOrcamentos({ user, supabase, getFamilyMemberIds }: UseOrcamen
       setLoading(false);
       isInitialLoad.current = false;
     }
-  }, [supabase, user, getFamilyMemberIds]);
+  }, [supabase, user, familyMemberIds]);
 
   useEffect(() => {
+    if (authLoading) return;
     fetchOrcamentos();
 
     const channel = supabase
@@ -68,7 +63,7 @@ export function useOrcamentos({ user, supabase, getFamilyMemberIds }: UseOrcamen
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchOrcamentos]);
+  }, [authLoading, supabase, fetchOrcamentos]);
 
   const addOrcamento = async (mes: string, limite: number) => {
     if (!user) throw new Error('User not found');
