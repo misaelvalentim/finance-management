@@ -10,7 +10,8 @@ import {
   FaBriefcaseMedical,
   FaUniversity,
   FaUtensils,
-  FaEllipsisH
+  FaEllipsisH,
+  FaCar
 } from 'react-icons/fa';
 import { formatBRL } from '@/utils/currency';
 
@@ -21,6 +22,7 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
   'saude': <FaBriefcaseMedical className="text-gray-700" />,
   'faculdade': <FaUniversity className="text-gray-700" />, 
   'salario': <FaMoneyBillWave className="text-gray-700" />, 
+  'carro': <FaCar className="text-gray-700" />,
   'outro': <FaEllipsisH className="text-gray-700" />,
 };
 
