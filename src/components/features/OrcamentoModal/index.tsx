@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import CurrencyInput from 'react-currency-input-field';
 import { FaCalendarAlt, FaTrash } from 'react-icons/fa';
-import { Orcamento, OrcamentoModalProps, OrcamentoFormProps, OrcamentoListProps } from './OrcamentoModalProps';
+import { OrcamentoModalProps, OrcamentoFormProps, OrcamentoListProps } from './OrcamentoModalProps';
 import { getMonthYear, fromYYYYMMDD, toYYYYMM } from '@/utils/date';
 import { formatBRL } from '@/utils/currency';
 

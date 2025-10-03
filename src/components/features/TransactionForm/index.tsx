@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FaArrowUp, FaArrowDown, FaRegBookmark } from 'react-icons/fa';
 import CurrencyInput from 'react-currency-input-field';
 import { getInitialDateForForm } from '@/utils/date';
-import { TransactionFormProps, Categoria } from './TransactionFormProps';
+import { TransactionFormProps } from './TransactionFormProps';
 
 const TransactionForm = ({ onSuccess, onClose, categories, currentDate, addTransaction, user }: TransactionFormProps) => {
   const [descricao, setDescricao] = useState('');
