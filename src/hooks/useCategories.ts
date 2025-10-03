@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Categoria } from '@/types';
+import { Categoria } from '@/components/features/TransactionForm/TransactionFormProps';
 import { SupabaseClient, User } from '@supabase/supabase-js';
 
 interface UseCategoriesProps {
