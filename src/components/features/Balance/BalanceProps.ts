@@ -1,5 +1,5 @@
 import { Lancamento } from '@/components/features/TransactionList/TransactionListProps';
-import { Orcamento } from '@/components/features/OrcamentoModal/OrcamentoModal.types';
+import { Orcamento } from '@/components/features/OrcamentoModal/OrcamentoModalProps';
 
 export interface BalanceProps {
   currentDate: Date;
