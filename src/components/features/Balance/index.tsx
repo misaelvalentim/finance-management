@@ -5,26 +5,11 @@ import { useBalance } from '@/hooks/useBalance';
 import { useEffect, useState } from 'react';
 import { getMonthYear } from '@/utils/date';
 import { formatBRL } from '@/utils/currency';
-import { useData } from '@/contexts/DataContext';
+import { BalanceProps } from './BalanceProps';
 
-
-interface BalanceProps {
-  onOpenOrcamento: () => void;
-}
-
-const Balance = ({ onOpenOrcamento }: BalanceProps) => {
-  const { 
-    currentDate,
-    transactions, 
-    orcamentos,
-    transactionsLoading, 
-    orcamentosLoading 
-  } = useData();
-
+const Balance = ({ currentDate, onOpenOrcamento, transactions, orcamentos, loading }: BalanceProps) => {
   const { available, progress, used, limit } = useBalance({ currentDate, transactions, orcamentos });
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-
-  const loading = transactionsLoading || orcamentosLoading;
 
   useEffect(() => {
     if (!loading) {

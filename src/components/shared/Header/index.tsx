@@ -2,15 +2,13 @@
 
 import { FaSignOutAlt } from 'react-icons/fa';
 import Avatar from '@/components/features/Avatar';
-import { useData } from '@/contexts/DataContext';
+import { HeaderProps } from './HeaderProps';
 
-const Header = () => {
-  const { profile, signOut } = useData();
-
+const Header = ({ profile, signOut, uploadAvatar }: HeaderProps) => {
   return (
     <header className="flex items-center justify-between p-4 bg-white">
       <div className="flex items-center">
-        <Avatar profile={profile} />
+        <Avatar profile={profile} uploadAvatar={uploadAvatar} />
         <div className="ml-3">
           <h1 className="text-lg font-bold uppercase">Olá, {profile?.nome_completo || '...'}!</h1>
           <p className="text-sm text-gray-500">Vamos organizar suas finanças?</p>

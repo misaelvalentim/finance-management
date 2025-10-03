@@ -1,4 +1,3 @@
-
 "use client";
 
 import { createContext, useContext, ReactNode, useState } from 'react';
@@ -7,23 +6,26 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useOrcamentos } from '@/hooks/useOrcamentos';
 import { useCategories } from '@/hooks/useCategories';
 import { User, SupabaseClient } from '@supabase/supabase-js';
-import { Lancamento, Orcamento, Categoria, Profile } from '@/types';
+import { Lancamento } from '@/components/features/TransactionList/TransactionListProps';
+import { Orcamento } from '@/components/features/OrcamentoModal/OrcamentoModalProps';
+import { Categoria } from '@/components/features/TransactionForm/TransactionFormProps';
+import { Profile, HeaderProps } from '@/components/shared/Header/HeaderProps';
+import { getToday } from '@/utils/date';
 
 // Define the shape of the context data
-interface DataContextType {
+interface DataContextType extends Omit<HeaderProps, 'profile'> {
   // Auth
   supabase: SupabaseClient;
   user: User | null;
   profile: Profile | null;
   authLoading: boolean;
-  signOut: () => Promise<void>;
-  uploadAvatar: (file: File) => Promise<void>;
   familyMemberIds: string[];
 
   // Transactions
   transactions: Lancamento[];
   transactionsLoading: boolean;
   deleteTransaction: (id: number) => Promise<void>;
+  addTransaction: (transaction: Omit<Lancamento, 'id' | 'created_at' | 'categorias' | 'profiles'>) => Promise<void>;
   revalidateTransactions: () => void;
 
   // Orcamentos
@@ -48,11 +50,11 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // Create the provider component
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(getToday());
 
   const { supabase, user, profile, loading: authLoading, signOut, uploadAvatar, familyMemberIds } = useAuth();
   
-  const { transactions, loading: transactionsLoading, deleteTransaction, revalidate: revalidateTransactions } = useTransactions({
+  const { transactions, loading: transactionsLoading, deleteTransaction, addTransaction, revalidate: revalidateTransactions } = useTransactions({
     currentDate,
     user,
     supabase,
@@ -84,6 +86,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     transactions,
     transactionsLoading,
     deleteTransaction,
+    addTransaction,
     revalidateTransactions,
     orcamentos,
     orcamentosLoading,

@@ -31,3 +31,41 @@ export const formatFriendlyDate = (dateString: string, locale: string = 'pt-BR')
     const month = date.toLocaleString(locale, { month: 'long' });
     return `${day} de ${month}`;
 };
+
+export const isSameMonth = (date1: Date, date2: Date): boolean => {
+  return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
+};
+
+export const getInitialDateForForm = (currentDate: Date): string => {
+  const now = new Date();
+  if (isSameMonth(now, currentDate)) {
+    return toYYYYMMDD(now);
+  }
+  return toYYYYMMDD(currentDate);
+};
+
+export const fromYYYYMMDD = (dateString: string): Date => {
+  return new Date(dateString + 'T00:00:00');
+};
+
+export const getPreviousMonth = (date: Date): Date => {
+  return new Date(date.getFullYear(), date.getMonth() - 1, 1);
+};
+
+export const getNextMonth = (date: Date): Date => {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 1);
+};
+
+export const setMonth = (date: Date, monthIndex: number): Date => {
+  return new Date(date.getFullYear(), monthIndex, 1);
+};
+
+export const getToday = (): Date => {
+  return new Date();
+};
+
+export const toYYYYMM = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+};

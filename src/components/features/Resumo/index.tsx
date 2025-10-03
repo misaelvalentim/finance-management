@@ -1,11 +1,7 @@
 "use client";
 
 import { formatBRL } from '@/utils/currency';
-import { Lancamento } from '@/types';
-
-interface ResumoProps {
-  transactions: Lancamento[];
-}
+import { ResumoProps } from './ResumoProps';
 
 const Resumo = ({ transactions }: ResumoProps) => {
   const summary = transactions.reduce((acc, transaction) => {

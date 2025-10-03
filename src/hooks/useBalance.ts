@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getMonthYear } from '@/utils/date';
-import { Lancamento, Orcamento } from '@/types';
+import { getMonthYear, fromYYYYMMDD } from '@/utils/date';
+import { Lancamento } from '@/components/features/TransactionList/TransactionListProps';
+import { Orcamento } from '@/components/features/OrcamentoModal/OrcamentoModalProps';
 
 interface UseBalanceProps {
   currentDate: Date;
@@ -14,11 +15,11 @@ export function useBalance({ currentDate, transactions, orcamentos }: UseBalance
   const [income, setIncome] = useState(0);
 
   useEffect(() => {
-    const { month: currentMonth, year: currentYear } = getMonthYear(new Date(currentDate));
+    const { month: currentMonth, year: currentYear } = getMonthYear(currentDate);
 
     const totalLimit = orcamentos
       .filter(o => {
-        const orcamentoDate = new Date(o.mes + 'T00:00:00');
+        const orcamentoDate = fromYYYYMMDD(o.mes);
         const { month: orcamentoMonth, year: orcamentoYear } = getMonthYear(orcamentoDate);
         return orcamentoMonth === currentMonth && orcamentoYear === currentYear;
       })

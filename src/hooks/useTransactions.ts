@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Lancamento } from '@/types';
+import { Lancamento } from '@/components/features/TransactionList/TransactionListProps';
 import { SupabaseClient, User } from '@supabase/supabase-js';
+
+import { getFirstDayOfMonth, getLastDayOfMonth } from '@/utils/date';
 
 interface UseTransactionsProps {
   currentDate: Date;
@@ -20,14 +22,14 @@ export function useTransactions({ currentDate, user, supabase, familyMemberIds, 
       setTransactions([]);
       setLoading(false);
       return;
-    };
+    }
 
     if (isInitialLoad.current) {
       setLoading(true);
     }
 
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0];
-    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).toISOString().split('T')[0]; 
+    const firstDayOfMonth = getFirstDayOfMonth(currentDate);
+    const lastDayOfMonth = getLastDayOfMonth(currentDate); 
 
     const { data, error } = await supabase
       .from('lancamentos')
@@ -91,8 +93,6 @@ export function useTransactions({ currentDate, user, supabase, familyMemberIds, 
     const { error } = await supabase.from('lancamentos').delete().match({ id });
     if (error) {
       console.error('Error deleting transaction:', error);
-    } else {
-      fetchTransactions();
     }
   };
 
@@ -101,5 +101,13 @@ export function useTransactions({ currentDate, user, supabase, familyMemberIds, 
     fetchTransactions();
   };
 
-  return { transactions, loading, deleteTransaction, refetch: fetchTransactions, revalidate };
+  const addTransaction = async (transaction: Omit<Lancamento, 'id' | 'created_at' | 'categorias' | 'profiles'>) => {
+    const { error } = await supabase.from('lancamentos').insert(transaction);
+
+    if (error) {
+      throw error;
+    }
+  };
+
+  return { transactions, loading, deleteTransaction, addTransaction, refetch: fetchTransactions, revalidate };
 }

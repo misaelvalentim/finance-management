@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lancamento } from '@/types';
+import { TransactionItemProps } from './TransactionItemProps';
 import { 
   FaTrash, 
   FaShoppingBasket, 
@@ -13,11 +13,6 @@ import {
   FaEllipsisH
 } from 'react-icons/fa';
 import { formatBRL } from '@/utils/currency';
-
-interface TransactionItemProps {
-  transaction: Lancamento;
-  onDelete: () => void;
-}
 
 const categoryIcons: { [key: string]: React.ReactNode } = {
   'mercado': <FaShoppingBasket className="text-gray-700" />,

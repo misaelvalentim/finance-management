@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Orcamento } from '@/types';
-import { getFirstDayOfMonth } from '@/utils/date';
+import { Orcamento } from '@/components/features/OrcamentoModal/OrcamentoModalProps';
+import { getFirstDayOfMonth, fromYYYYMMDD } from '@/utils/date';
 import { SupabaseClient, User } from '@supabase/supabase-js';
 
 interface UseOrcamentosProps {
@@ -68,7 +68,7 @@ export function useOrcamentos({ user, supabase, familyMemberIds, authLoading }: 
   const addOrcamento = async (mes: string, limite: number) => {
     if (!user) throw new Error('User not found');
 
-    const date = new Date(mes + 'T00:00:00');
+    const date = fromYYYYMMDD(mes);
     const firstDay = getFirstDayOfMonth(date);
 
     const { error } = await supabase

@@ -18,36 +18,50 @@ export default function Home() {
   const [isOrcamentoModalOpen, setIsOrcamentoModalOpen] = useState(false);
 
   const {
+    profile,
+    signOut,
+    uploadAvatar,
+    currentDate,
+    setCurrentDate,
     transactions,
     transactionsLoading,
+    addTransaction,
     deleteTransaction,
     revalidateTransactions,
+    categories,
+    categoriesLoading,
+    orcamentos,
+    orcamentosLoading,
+    addOrcamento,
+    deleteOrcamento,
     revalidateOrcamentos,
+    user
   } = useData();
 
   const handleDataChange = () => {
-    // This function is called after any successful data mutation (add/delete)
     setIsTransactionModalOpen(false);
-    // No need to close orcamento modal, it has its own button
-    
-    // Revalidate all data
     revalidateTransactions();
     revalidateOrcamentos();
   };
 
   const handleDeleteTransaction = async (id: number) => {
     await deleteTransaction(id);
-    // The realtime subscription in useTransactions should handle the update,
-    // but an explicit revalidate can be good for immediate feedback.
-    // handleDataChange(); // Re-enable if realtime feels slow
   };
+
+  const loading = transactionsLoading || categoriesLoading || orcamentosLoading;
 
   return (
     <main className="bg-gray-100 min-h-screen">
-      <Header />
-      <MonthSelector />
+      <Header profile={profile} signOut={signOut} uploadAvatar={uploadAvatar} />
+      <MonthSelector currentDate={currentDate} setCurrentDate={setCurrentDate} />
       <div className="p-4">
-        <Balance onOpenOrcamento={() => setIsOrcamentoModalOpen(true)} />
+        <Balance 
+          currentDate={currentDate} 
+          onOpenOrcamento={() => setIsOrcamentoModalOpen(true)}
+          transactions={transactions}
+          orcamentos={orcamentos}
+          loading={loading}
+        />
         <Accordion 
           title={
             <div className="flex justify-between w-full gap-2">
@@ -59,7 +73,7 @@ export default function Home() {
           } 
           defaultOpen={true}
         >
-          {transactionsLoading ? <p>Atualizando transacções...</p> : 
+          {loading ? <p>Atualizando transacções...</p> : 
             <TransactionList
               transactions={transactions}
               onDelete={handleDeleteTransaction}
@@ -67,7 +81,7 @@ export default function Home() {
           }
         </Accordion>
         <Accordion title="Resumo" defaultOpen={false}>
-          {transactionsLoading ? <p>Calculando resumo...</p> : <Resumo transactions={transactions} />}
+          {loading ? <p>Calculando resumo...</p> : <Resumo transactions={transactions} />}
         </Accordion>
       </div>
       <button
@@ -82,12 +96,21 @@ export default function Home() {
         <TransactionForm
           onSuccess={handleDataChange}
           onClose={() => setIsTransactionModalOpen(false)}
+          categories={categories}
+          currentDate={currentDate}
+          addTransaction={addTransaction}
+          user={user}
         />
       </Modal>
       <Slideover isOpen={isOrcamentoModalOpen} onClose={() => setIsOrcamentoModalOpen(false)}>
         <OrcamentoModal 
           onClose={() => setIsOrcamentoModalOpen(false)} 
           onSuccess={handleDataChange} 
+          currentDate={currentDate}
+          orcamentos={orcamentos}
+          orcamentosLoading={orcamentosLoading}
+          addOrcamento={addOrcamento}
+          deleteOrcamento={deleteOrcamento}
         />
       </Slideover>
     </main>

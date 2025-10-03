@@ -2,11 +2,21 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { Profile } from '@/types';
+import { User, SupabaseClient } from '@supabase/supabase-js';
+import { Profile, HeaderProps } from '@/components/shared/Header/HeaderProps';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useRouter } from 'next/navigation';
 
-export function useAuth() {
+
+export type UseAuthReturn = HeaderProps & {
+  supabase: SupabaseClient;
+  user: User | null;
+  loading: boolean;
+  router: AppRouterInstance;
+  familyMemberIds: string[];
+}
+
+export function useAuth(): UseAuthReturn {
   const supabase = createClient();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -43,10 +53,8 @@ export function useAuth() {
     fetchSessionAndProfile();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN') {
-          fetchSessionAndProfile();
-        } else if (event === 'SIGNED_OUT') {
+      (event) => {
+        if (event === 'SIGNED_OUT') {
           setProfile(null);
           setFamilyMemberIds([]);
           setUser(null);
@@ -62,7 +70,6 @@ export function useAuth() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    // The onAuthStateChange listener will handle the state cleanup and redirect
   };
 
   const uploadAvatar = async (file: File) => {

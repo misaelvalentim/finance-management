@@ -1,13 +1,8 @@
 "use client";
 
-import TransactionItem from './TransactionItem';
-import { Lancamento } from '@/types';
+import TransactionItem from '../TransactionItem';
+import { Lancamento, TransactionListProps } from './TransactionListProps';
 import { formatFriendlyDate } from '@/utils/date';
-
-interface TransactionListProps {
-  transactions: Lancamento[];
-  onDelete: (id: number) => void;
-}
 
 const TransactionList = ({ transactions, onDelete }: TransactionListProps) => {
   const groupedTransactions = transactions.reduce((acc, transaction) => {

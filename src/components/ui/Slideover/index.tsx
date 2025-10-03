@@ -1,12 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect } from 'react';
-
-interface SlideoverProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: ReactNode;
-}
+import { SlideoverProps } from './SlideoverProps';
 
 const Slideover = ({ isOpen, onClose, children }: SlideoverProps) => {
   useEffect(() => {

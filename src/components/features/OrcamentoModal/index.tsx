@@ -1,33 +1,23 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useData } from '@/contexts/DataContext';
 import CurrencyInput from 'react-currency-input-field';
 import { FaCalendarAlt, FaTrash } from 'react-icons/fa';
-import { Orcamento } from '@/types';
-import { getMonthYear, toYYYYMMDD } from '@/utils/date';
+import { Orcamento, OrcamentoModalProps, OrcamentoFormProps, OrcamentoListProps } from './OrcamentoModalProps';
+import { getMonthYear, fromYYYYMMDD, toYYYYMM } from '@/utils/date';
 import { formatBRL } from '@/utils/currency';
 
 
 // Form Component
-const OrcamentoForm = ({ onAdd, currentDate }: { onAdd: (mes: string, limite: number) => Promise<void>, currentDate: Date }) => {
-  const getInitialDate = () => {
-    const now = new Date();
-    const isSameMonth =
-      now.getFullYear() === currentDate.getFullYear() &&
-      now.getMonth() === currentDate.getMonth();
-
-    if (isSameMonth) {
-      return toYYYYMMDD(now);
-    } else {
-      return toYYYYMMDD(currentDate);
-    }
-  };
-
-  const [mes, setMes] = useState(getInitialDate());
+const OrcamentoForm = ({ onAdd, currentDate }: OrcamentoFormProps) => {
+  const [mes, setMes] = useState(toYYYYMM(currentDate));
   const [limite, setLimite] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setMes(toYYYYMM(currentDate));
+  }, [currentDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +28,8 @@ const OrcamentoForm = ({ onAdd, currentDate }: { onAdd: (mes: string, limite: nu
     setLoading(true);
     setError('');
     try {
-      await onAdd(mes, parseFloat(limite));
-      setMes(getInitialDate());
+      await onAdd(`${mes}-01`, parseFloat(limite));
+      setMes(toYYYYMM(currentDate));
       setLimite(undefined);
     } catch (err) {
       if (err instanceof Error) {
@@ -56,7 +46,7 @@ const OrcamentoForm = ({ onAdd, currentDate }: { onAdd: (mes: string, limite: nu
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex space-x-4">
           <input
-            type="date"
+            type="month"
             value={mes}
             onChange={(e) => setMes(e.target.value)}
             required
@@ -81,7 +71,7 @@ const OrcamentoForm = ({ onAdd, currentDate }: { onAdd: (mes: string, limite: nu
 };
 
 // List Component
-const OrcamentoList = ({ orcamentos, loading, onDelete }: { orcamentos: Orcamento[], loading: boolean, onDelete: (id: number) => Promise<void> }) => {
+const OrcamentoList = ({ orcamentos, loading, onDelete }: OrcamentoListProps) => {
   if (loading) return <p>Carregando orçamentos...</p>;
 
   return (
@@ -89,7 +79,7 @@ const OrcamentoList = ({ orcamentos, loading, onDelete }: { orcamentos: Orcament
       <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Orçamentos Cadastrados</h3>
       <div className="space-y-2">
         {orcamentos.map((orcamento) => {
-          const date = new Date(orcamento.mes + 'T00:00:00');
+          const date = fromYYYYMMDD(orcamento.mes);
           const { month, year } = getMonthYear(date);
 
           return (
@@ -119,14 +109,15 @@ const OrcamentoList = ({ orcamentos, loading, onDelete }: { orcamentos: Orcament
 };
 
 // Main Modal Component
-const OrcamentoModal = ({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) => {
-  const { 
-    orcamentos, 
-    orcamentosLoading, 
-    addOrcamento, 
-    deleteOrcamento,
-    currentDate 
-  } = useData();
+const OrcamentoModal = ({ 
+  onClose, 
+  onSuccess, 
+  currentDate,
+  orcamentos,
+  orcamentosLoading,
+  addOrcamento,
+  deleteOrcamento
+}: OrcamentoModalProps) => {
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   useEffect(() => {

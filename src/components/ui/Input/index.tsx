@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-
-export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
+import { InputProps } from './InputProps';
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {

@@ -2,12 +2,7 @@
 
 import { useState, ReactNode } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-
-interface AccordionProps {
-  title: ReactNode;
-  children: ReactNode;
-  defaultOpen?: boolean;
-}
+import { AccordionProps } from './AccordionProps';
 
 const Accordion = ({ title, children, defaultOpen = false }: AccordionProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);

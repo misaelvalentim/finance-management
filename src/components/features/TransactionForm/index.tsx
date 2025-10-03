@@ -1,70 +1,48 @@
 "use client";
 
 import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { FaArrowUp, FaArrowDown, FaRegBookmark } from 'react-icons/fa';
 import CurrencyInput from 'react-currency-input-field';
-import { toYYYYMMDD } from '@/utils/date';
-import { useData } from '@/contexts/DataContext';
+import { getInitialDateForForm } from '@/utils/date';
+import { TransactionFormProps, Categoria } from './TransactionFormProps';
 
-
-interface TransactionFormProps {
-  onSuccess: () => void;
-  onClose: () => void;
-}
-
-const TransactionForm = ({ onSuccess, onClose }: TransactionFormProps) => {
-  const supabase = createClient();
-  const { categories, currentDate } = useData();
-
-  const getInitialDate = () => {
-    const now = new Date();
-    const isSameMonth =
-      now.getFullYear() === currentDate.getFullYear() &&
-      now.getMonth() === currentDate.getMonth();
-
-    if (isSameMonth) {
-      return toYYYYMMDD(now);
-    } else {
-      return toYYYYMMDD(currentDate);
-    }
-  };
-
+const TransactionForm = ({ onSuccess, onClose, categories, currentDate, addTransaction, user }: TransactionFormProps) => {
   const [descricao, setDescricao] = useState('');
   const [categoriaId, setCategoriaId] = useState('');
   const [valor, setValor] = useState<string | undefined>(undefined);
-  const [data, setData] = useState(getInitialDate());
+  const [data, setData] = useState(getInitialDateForForm(currentDate));
   const [tipo, setTipo] = useState<'income' | 'expense'>('expense');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage('');
-
-    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       setMessage('You must be logged in to add a transaction.');
-      setLoading(false);
       return;
     }
 
-    const { error } = await supabase.from('lancamentos').insert({
-      descricao,
-      valor: parseFloat(valor || '0'),
-      data,
-      tipo,
-      user_id: user.id,
-      categoria_id: parseInt(categoriaId),
-    });
+    setLoading(true);
+    setMessage('');
 
-    if (error) {
-      setMessage(error.message);
-    } else {
+    try {
+      await addTransaction({
+        descricao,
+        valor: parseFloat(valor || '0'),
+        data,
+        tipo,
+        user_id: user.id,
+        categoria_id: parseInt(categoriaId),
+      });
       onSuccess();
+    } catch (error) {
+      if (error instanceof Error) {
+        setMessage(error.message);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

@@ -1,16 +1,10 @@
 "use client";
 
-import { Profile } from '@/types';
 import Image from 'next/image';
 import { ChangeEvent, useState } from 'react';
-import { useData } from '@/contexts/DataContext';
+import { AvatarProps } from './AvatarProps';
 
-interface AvatarProps {
-  profile: Profile | null;
-}
-
-export default function Avatar({ profile }: AvatarProps) {
-  const { uploadAvatar } = useData();
+export default function Avatar({ profile, uploadAvatar }: AvatarProps) {
   const [uploading, setUploading] = useState(false);
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
