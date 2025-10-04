@@ -29,7 +29,7 @@ const TransactionForm = ({ onSuccess, onClose, categories, currentDate, addTrans
     try {
       await addTransaction({
         descricao,
-        valor: parseFloat(valor || '0'),
+        valor: parseFloat((valor || '0').replace(',', '.')),
         data,
         tipo,
         user_id: user.id,
