@@ -38,7 +38,7 @@ export function useBalance({ currentDate, transactions, orcamentos }: UseBalance
 
   }, [transactions, orcamentos, currentDate]);
 
-  const available = limit - used;
+  const available = limit + income - used;
   const progress = limit > 0 ? (used / limit) * 100 : 0;
 
   return { available, progress, used, limit, income };

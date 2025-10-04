@@ -50,11 +50,17 @@ export function useAuth(): UseAuthReturn {
   }, [supabase]);
 
   useEffect(() => {
-    fetchSessionAndProfile();
+    if (!user) {
+      fetchSessionAndProfile();
+    }
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event) => {
-        if (event === 'SIGNED_OUT') {
+      (event, session) => {
+        if (event === 'SIGNED_IN') {
+          if (user?.id !== session?.user?.id) {
+            fetchSessionAndProfile();
+          }
+        } else if (event === 'SIGNED_OUT') {
           setProfile(null);
           setFamilyMemberIds([]);
           setUser(null);
@@ -66,7 +72,7 @@ export function useAuth(): UseAuthReturn {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, router, fetchSessionAndProfile]);
+  }, [supabase, router, fetchSessionAndProfile, user]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
