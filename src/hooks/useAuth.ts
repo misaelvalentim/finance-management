@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { User, SupabaseClient } from '@supabase/supabase-js';
-import { Profile, HeaderProps } from '@/components/shared/Header/HeaderProps';
+import { HeaderProps } from '@/components/shared/Header/HeaderProps';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useRouter } from 'next/navigation';
-
+import useSWR from 'swr';
 
 export type UseAuthReturn = HeaderProps & {
   supabase: SupabaseClient;
@@ -16,54 +16,42 @@ export type UseAuthReturn = HeaderProps & {
   familyMemberIds: string[];
 }
 
+const fetcher = async (supabase: SupabaseClient) => {
+  const { data, error } = await supabase.rpc('get_initial_user_data');
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+
 export function useAuth(): UseAuthReturn {
   const supabase = createClient();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [familyMemberIds, setFamilyMemberIds] = useState<string[]>([]);
 
-  const fetchSessionAndProfile = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const currentUser = session?.user ?? null;
-    setUser(currentUser);
+  const { data: initialUserData, mutate } = useSWR(user ? 'initial_user_data' : null, () => fetcher(supabase));
 
-    if (currentUser) {
-      // Call the RPC function to get profile and family members in one go
-      const { data, error } = await supabase.rpc('get_initial_user_data');
-
-      if (error) {
-        console.error('Error fetching initial user data:', error);
-        setProfile(null);
-        setFamilyMemberIds(currentUser ? [currentUser.id] : []);
-      } else if (data) {
-        setProfile(data.profile);
-        setFamilyMemberIds(data.familyMemberIds ?? [currentUser.id]);
-      }
-    } else {
-      // Ensure state is cleared on logout
-      setProfile(null);
-      setFamilyMemberIds([]);
-    }
-    setLoading(false);
-  }, [supabase]);
+  const profile = initialUserData?.profile ?? null;
+  const familyMemberIds = initialUserData?.familyMemberIds ?? (user ? [user.id] : []);
 
   useEffect(() => {
-    if (!user) {
-      fetchSessionAndProfile();
-    }
+    const fetchSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    fetchSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+
         if (event === 'SIGNED_IN') {
-          if (user?.id !== session?.user?.id) {
-            fetchSessionAndProfile();
-          }
+          mutate(); // Revalidate user data on sign in
         } else if (event === 'SIGNED_OUT') {
-          setProfile(null);
-          setFamilyMemberIds([]);
-          setUser(null);
           router.push('/login');
         }
       }
@@ -72,7 +60,7 @@ export function useAuth(): UseAuthReturn {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, router, fetchSessionAndProfile, user]);
+  }, [supabase, router, mutate]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -104,7 +92,7 @@ export function useAuth(): UseAuthReturn {
 
       if (updateError) throw updateError;
       
-      setProfile(prevProfile => prevProfile ? { ...prevProfile, avatar_url: cacheBustedUrl } : null);
+      mutate(); // Revalidate user data after avatar upload
 
     } catch (error) {
       if (error instanceof Error) {
