@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { getPreviousMonth, getNextMonth, setMonth } from '@/utils/date';
 import { MonthSelectorProps } from '@/components/shared/MonthSelector/MonthSelectorProps';
 
@@ -8,14 +8,19 @@ export const useMonthSelector = ({ currentDate, setCurrentDate }: MonthSelectorP
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentMonth = currentDate.getMonth();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (scrollContainerRef.current) {
-      const selectedMonthButton = scrollContainerRef.current.children[currentMonth] as HTMLElement;
+      const container = scrollContainerRef.current;
+      const selectedMonthButton = container.children[currentMonth] as HTMLElement;
+
       if (selectedMonthButton) {
-        selectedMonthButton.scrollIntoView({
+        const containerWidth = container.offsetWidth;
+        const buttonLeft = selectedMonthButton.offsetLeft;
+        const buttonWidth = selectedMonthButton.offsetWidth;
+
+        container.scrollTo({
+          left: buttonLeft - (containerWidth / 2) + (buttonWidth / 2),
           behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center',
         });
       }
     }

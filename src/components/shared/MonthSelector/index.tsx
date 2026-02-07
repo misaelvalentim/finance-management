@@ -17,7 +17,7 @@ const MonthSelector = (props: MonthSelectorProps) => {
   return (
     <div className="flex items-center justify-between p-4 bg-white">
       <button onClick={handlePrevMonth}><FaChevronLeft /></button>
-      <div ref={scrollContainerRef} className="flex items-center space-x-4 overflow-x-auto w-full justify-center">
+      <div ref={scrollContainerRef} className="flex items-center space-x-4 overflow-x-auto w-full">
         {months.map((month, index) => (
           <button
             key={month}
