@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Orcamento } from '@/components/features/OrcamentoModal/OrcamentoModalProps';
 import { getFirstDayOfMonth, fromYYYYMMDD } from '@/utils/date';
 import { SupabaseClient, User } from '@supabase/supabase-js';
+import { useSupabaseData } from './useSupabaseData';
 
 interface UseOrcamentosProps {
   user: User | null;
@@ -11,51 +12,31 @@ interface UseOrcamentosProps {
 }
 
 export function useOrcamentos({ user, supabase, familyMemberIds, authLoading }: UseOrcamentosProps) {
-  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
-  const [loading, setLoading] = useState(true);
-  const isInitialLoad = useRef(true);
-
-  const fetchOrcamentos = useCallback(async () => {
-    if (!user || familyMemberIds.length === 0) {
-      setOrcamentos([]);
-      setLoading(false);
-      return;
+  const query = useMemo(() => {
+    if (!user || familyMemberIds.length === 0 || authLoading) {
+      return null;
     }
-
-    if (isInitialLoad.current) {
-      setLoading(true);
-    }
-
-    const { data, error } = await supabase
+    return supabase
       .from('orcamentos')
       .select('*')
       .in('user_id', familyMemberIds)
       .order('mes', { ascending: false });
+  }, [user, familyMemberIds, authLoading, supabase]);
 
-    if (error) {
-      console.error('Error fetching orcamentos:', error);
-      setOrcamentos([]);
-    } else {
-      setOrcamentos(data);
-    }
+  const key = query ? `orcamentos-${familyMemberIds.join('-')}` : null;
 
-    if (isInitialLoad.current) {
-      setLoading(false);
-      isInitialLoad.current = false;
-    }
-  }, [supabase, user, familyMemberIds]);
+  const { data: orcamentos, isLoading, revalidate } = useSupabaseData<Orcamento>(key, query);
 
   useEffect(() => {
-    if (authLoading) return;
-    fetchOrcamentos();
+    if (authLoading || !query) return;
 
     const channel = supabase
       .channel('public:orcamentos')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orcamentos' },
-        (_payload) => {
-          fetchOrcamentos();
+        () => {
+          revalidate();
         }
       )
       .subscribe();
@@ -63,7 +44,7 @@ export function useOrcamentos({ user, supabase, familyMemberIds, authLoading }: 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authLoading, supabase, fetchOrcamentos]);
+  }, [authLoading, supabase, query, revalidate]);
 
   const addOrcamento = async (mes: string, limite: number) => {
     if (!user) throw new Error('User not found');
@@ -76,17 +57,14 @@ export function useOrcamentos({ user, supabase, familyMemberIds, authLoading }: 
       .insert({ mes: firstDay, limite, user_id: user.id });
 
     if (error) throw error;
+    revalidate();
   };
 
   const deleteOrcamento = async (id: number) => {
     const { error } = await supabase.from('orcamentos').delete().match({ id });
     if (error) throw error;
+    revalidate();
   };
 
-  const revalidate = () => {
-    isInitialLoad.current = true;
-    fetchOrcamentos();
-  };
-
-  return { orcamentos, loading, addOrcamento, deleteOrcamento, revalidate };
+  return { orcamentos, loading: isLoading, addOrcamento, deleteOrcamento, revalidate };
 }

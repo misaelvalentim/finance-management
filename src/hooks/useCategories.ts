@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Categoria } from '@/components/features/TransactionForm/TransactionFormProps';
 import { SupabaseClient, User } from '@supabase/supabase-js';
+import { useSupabaseData } from './useSupabaseData';
 
 interface UseCategoriesProps {
   supabase: SupabaseClient;
@@ -9,49 +10,27 @@ interface UseCategoriesProps {
 }
 
 export function useCategories({ supabase, user, authLoading }: UseCategoriesProps) {
-  const [categories, setCategories] = useState<Categoria[]>([]);
-  const [loading, setLoading] = useState(true);
-  const isInitialLoad = useRef(true);
-
-  const fetchCategories = useCallback(async () => {
-    if (!user) {
-      setCategories([]);
-      setLoading(false);
-      return;
+  const query = useMemo(() => {
+    if (!user || authLoading) {
+      return null;
     }
+    return supabase.from('categorias').select('id, nome');
+  }, [user, authLoading, supabase]);
 
-    if (isInitialLoad.current) {
-      setLoading(true);
-    }
+  const key = query ? 'categorias' : null;
 
-    const { data: categoriesData, error } = await supabase
-      .from('categorias')
-      .select('id, nome');
-    
-    if (error) {
-      console.error('Error fetching categories:', error);
-      setCategories([]);
-    } else {
-      setCategories(categoriesData);
-    }
-
-    if (isInitialLoad.current) {
-      setLoading(false);
-      isInitialLoad.current = false;
-    }
-  }, [supabase, user]);
+  const { data: categories, isLoading, revalidate } = useSupabaseData<Categoria>(key, query);
 
   useEffect(() => {
-    if (authLoading) return;
-    fetchCategories();
+    if (authLoading || !query) return;
 
     const channel = supabase
       .channel('public:categorias')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'categorias' },
-        (_payload) => {
-          fetchCategories();
+        () => {
+          revalidate();
         }
       )
       .subscribe();
@@ -59,12 +38,7 @@ export function useCategories({ supabase, user, authLoading }: UseCategoriesProp
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authLoading, supabase, fetchCategories]);
+  }, [authLoading, supabase, query, revalidate]);
 
-  const revalidate = () => {
-    isInitialLoad.current = true;
-    fetchCategories();
-  };
-
-  return { categories, loading, revalidate };
+  return { categories, loading: isLoading, revalidate };
 }

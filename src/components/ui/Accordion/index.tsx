@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ReactNode } from 'react';
+import { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { AccordionProps } from './AccordionProps';
 

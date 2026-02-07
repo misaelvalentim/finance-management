@@ -26,19 +26,19 @@ interface DataContextType extends Omit<HeaderProps, 'profile'> {
   transactionsLoading: boolean;
   deleteTransaction: (id: number) => Promise<void>;
   addTransaction: (transaction: Omit<Lancamento, 'id' | 'created_at' | 'categorias' | 'profiles'>) => Promise<void>;
-  revalidateTransactions: () => void;
+  revalidateTransactions: () => Promise<Lancamento[] | undefined>;
 
   // Orcamentos
   orcamentos: Orcamento[];
   orcamentosLoading: boolean;
   addOrcamento: (mes: string, limite: number) => Promise<void>;
   deleteOrcamento: (id: number) => Promise<void>;
-  revalidateOrcamentos: () => void;
+  revalidateOrcamentos: () => Promise<Orcamento[] | undefined>;
 
   // Categories
   categories: Categoria[];
   categoriesLoading: boolean;
-  revalidateCategories: () => void;
+  revalidateCategories: () => Promise<Categoria[] | undefined>;
   
   // Global state
   currentDate: Date;
