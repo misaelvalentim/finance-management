@@ -50,7 +50,9 @@ export function useAuth(): UseAuthReturn {
         setUser(currentUser);
 
         if (event === 'SIGNED_IN') {
-          mutate(); // Revalidate user data on sign in
+          if (user?.id !== session?.user?.id) {
+            mutate(); // Revalidate user data on sign in
+          }
         } else if (event === 'SIGNED_OUT') {
           router.push('/login');
         }
@@ -60,7 +62,7 @@ export function useAuth(): UseAuthReturn {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, router, mutate]);
+  }, [supabase, router, mutate, user?.id]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
